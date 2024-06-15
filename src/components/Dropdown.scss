@@ -25,7 +25,7 @@
     .dropdown-label {
       display: flex;
       align-items: center;
-      font-size: 14px;
+      font-size: 13px;
       margin-bottom: 8px;
       color: #333;
   
@@ -53,7 +53,7 @@
         flex-wrap: wrap;
         align-items: center;
         gap: 5px;
-        width: calc(100% - 40px); /* Adjust based on icons width */
+        width: calc(100% - 40px);
         overflow: hidden;
         padding-right: 10px;
   
@@ -132,7 +132,7 @@
     .helper-text {
       font-size: 12px;
       color: #888;
-      margin-top: 5px;
+      margin-top: 7px;
     }
   }
   

@@ -1,6 +1,6 @@
 // src/components/Dropdown.tsx
 import React, { useState } from 'react';
-import { CaretDown, UserCircle, Info, X } from 'phosphor-react'; // Import X from Phosphor Icons for deselection
+import { CaretDown, UserCircle, Info, X } from 'phosphor-react';
 import './Dropdown.scss';
 
 export interface DropdownProps {

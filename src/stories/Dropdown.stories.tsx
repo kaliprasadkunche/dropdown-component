@@ -31,7 +31,7 @@ Default.args = {
   status: 'Unfilled',
   labelIconVisibility: 'Visible',
   leftIconVisibility: 'Visible',
-  helperText: 'Helper Text',
+  helperText: 'Helper Text Here',
   required: false,
   text: 'Select Option',
   type: 'SingleNoIcon',
