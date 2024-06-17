@@ -69,6 +69,11 @@ const Dropdown: React.FC<DropdownProps> = ({
     onSelect?.(newSelectedItems);
   };
 
+  const clearSelection = () => {
+    setSelectedItems([]);
+    onSelect?.([]);
+  };
+
   const determineDirection = () => {
     if (!dropdownRef.current || !listRef.current) return;
     const dropdownRect = dropdownRef.current.getBoundingClientRect();
@@ -98,7 +103,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       {labelVisibility === 'Visible' && (
         <label className="dropdown-label">
           {labelIconVisibility === 'Visible' && <Info className="label-icon" />}
-          {label} {required && '*'}
+          {label} {required && <span className="required-symbol">*</span>}
         </label>
       )}
       <div className="dropdown-input" onClick={handleToggle}>
@@ -117,7 +122,12 @@ const Dropdown: React.FC<DropdownProps> = ({
           ))}
           {selectedItems.length === 0 && <span className="placeholder">{text}</span>}
         </div>
-        <CaretDown className="caret-icon" />
+        <div className="caret-icon">
+          <CaretDown />
+        </div>
+        {selectedItems.length > 0 && (
+          <button className="clear-button" onClick={clearSelection}>Clear</button>
+        )}
       </div>
       {isOpen && (
         <ul ref={listRef} className={`dropdown-list ${type.toLowerCase()} ${direction}`}>
@@ -126,6 +136,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               key={index}
               className={selectedItems.includes(item) ? 'active' : ''}
               onClick={() => handleSelect(index)}
+              title={item} // For tooltip on truncated text
             >
               {type === 'SingleRadio' && <input type="radio" checked={selectedItems.includes(item)} readOnly />}
               {type === 'Multi' && <input type="checkbox" checked={selectedItems.includes(item)} readOnly />}
