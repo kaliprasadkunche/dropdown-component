@@ -1,5 +1,4 @@
-// src/components/Dropdown.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CaretDown, UserCircle, Info, X } from 'phosphor-react';
 import './Dropdown.scss';
 
@@ -15,6 +14,7 @@ export interface DropdownProps {
   type: 'SingleNoIcon' | 'SingleRadio' | 'Multi';
   activeItemIndex: number;
   items: string[];
+  onSelect?: (selectedItems: string[]) => void;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -28,10 +28,14 @@ const Dropdown: React.FC<DropdownProps> = ({
   text,
   type,
   activeItemIndex,
-  items
+  items,
+  onSelect,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [direction, setDirection] = useState<'bottom' | 'top' | 'right' | 'left'>('bottom');
 
   const handleToggle = () => {
     if (status !== 'Disabled') {
@@ -40,25 +44,57 @@ const Dropdown: React.FC<DropdownProps> = ({
   };
 
   const handleSelect = (index: number) => {
+    let newSelectedItems: string[] = [];
+
     if (type === 'SingleNoIcon' || type === 'SingleRadio') {
-      setSelectedItems([items[index]]);
+      newSelectedItems = [items[index]];
+      setSelectedItems(newSelectedItems);
     } else if (type === 'Multi') {
       const item = items[index];
       if (selectedItems.includes(item)) {
-        setSelectedItems(selectedItems.filter((selected) => selected !== item));
+        newSelectedItems = selectedItems.filter((selected) => selected !== item);
       } else {
-        setSelectedItems([...selectedItems, item]);
+        newSelectedItems = [...selectedItems, item];
       }
+      setSelectedItems(newSelectedItems);
     }
+
     setIsOpen(false);
+    onSelect?.(newSelectedItems);
   };
 
   const handleDeselect = (item: string) => {
-    setSelectedItems(selectedItems.filter((selected) => selected !== item));
+    const newSelectedItems = selectedItems.filter((selected) => selected !== item);
+    setSelectedItems(newSelectedItems);
+    onSelect?.(newSelectedItems);
   };
 
+  const determineDirection = () => {
+    if (!dropdownRef.current || !listRef.current) return;
+    const dropdownRect = dropdownRef.current.getBoundingClientRect();
+    const listHeight = listRef.current.offsetHeight;
+
+    if (window.innerHeight - dropdownRect.bottom >= listHeight) {
+      setDirection('bottom');
+    } else if (dropdownRect.top >= listHeight) {
+      setDirection('top');
+    } else if (window.innerWidth - dropdownRect.right >= dropdownRect.width) {
+      setDirection('right');
+    } else if (dropdownRect.left >= dropdownRect.width) {
+      setDirection('left');
+    } else {
+      setDirection('bottom');
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      determineDirection();
+    }
+  }, [isOpen]);
+
   return (
-    <div className={`dropdown ${status.toLowerCase()}`}>
+    <div ref={dropdownRef} className={`dropdown ${status.toLowerCase()}`}>
       {labelVisibility === 'Visible' && (
         <label className="dropdown-label">
           {labelIconVisibility === 'Visible' && <Info className="label-icon" />}
@@ -71,19 +107,20 @@ const Dropdown: React.FC<DropdownProps> = ({
           {selectedItems.map((item, index) => (
             <div key={index} className="selected-item">
               {item}
-              <span className="deselect-icon" onClick={() => handleDeselect(item)}>
+              <span className="deselect-icon" onClick={(e) => {
+                e.stopPropagation();
+                handleDeselect(item);
+              }}>
                 <X size={16} />
               </span>
             </div>
           ))}
-          {selectedItems.length === 0 && (
-            <span className="placeholder">Select an option</span>
-          )}
+          {selectedItems.length === 0 && <span className="placeholder">{text}</span>}
         </div>
         <CaretDown className="caret-icon" />
       </div>
       {isOpen && (
-        <ul className={`dropdown-list ${type.toLowerCase()}`}>
+        <ul ref={listRef} className={`dropdown-list ${type.toLowerCase()} ${direction}`}>
           {items.map((item, index) => (
             <li
               key={index}
